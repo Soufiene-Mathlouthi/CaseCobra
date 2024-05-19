@@ -9,13 +9,11 @@ export const { auth } = NextAuth(authConfig)
 export async function middleware(req: Request) {
   const isLoggedIn = !!(await auth())
   const url = new URL(req.url);
-  console.log(req.url, isLoggedIn)
 
   const isApiAuthRoute = url.pathname.startsWith(apiAuthPrefix)
   const isPublicRoute = publicRoutes.includes(url.pathname)
   const isAuthRoute = authRoutes.includes(url.pathname)
 
-  console.log(isPublicRoute)
 
   if(isApiAuthRoute){
     return NextResponse.next();
