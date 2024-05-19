@@ -3,7 +3,7 @@ import { Suspense } from "react"
 const Page = () => {
 
     return <Suspense>
-        <ThankYou />
+        {/* <ThankYou /> */}
     </Suspense>
 }
 
