@@ -1,3 +1,4 @@
+import { db } from "@/db"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -11,4 +12,25 @@ export const formatPrice = (price: number) => {
     currency: 'USD',
   })
   return formatter.format(price)
+}
+
+export const getUserByEmail = async (email:string) => {
+  try{
+    const user = await db.user.findUnique({
+      where: {email}
+    })
+    return user;
+  } catch {
+    return null
+  }
+}
+export const getUserById = async (id:string) => {
+  try{
+    const user = await db.user.findUnique({
+      where: {id}
+    })
+    return user;
+  } catch {
+    return null
+  }
 }

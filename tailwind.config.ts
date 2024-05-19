@@ -7,7 +7,7 @@ const config = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-	],
+  ],
   prefix: "",
   theme: {
     container: {
@@ -63,7 +63,7 @@ const config = {
           from: {
             opacity: "0"
           },
-          to:{
+          to: {
             opacity: "1"
           }
         },
@@ -71,11 +71,16 @@ const config = {
           '100%': {
             transform: 'translateY(-50%)'
           }
+        },
+        flashing: {
+          "0%, 100%": { opacity: '0.2' },
+          "20%": { opacity: "1" }
         }
       },
       animation: {
         "marquee": 'marquee var(--marquee-duration) linear infinite',
-        "fade-in": "fade-in 0.5s linear forwards"
+        "fade-in": "fade-in 0.5s linear forwards",
+        flashing: "flashing 1.4s infinite linear"
       },
     },
   },
