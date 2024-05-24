@@ -1,5 +1,6 @@
 import { db } from "@/db"
 import { type ClassValue, clsx } from "clsx"
+import { Metadata } from "next"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -14,20 +15,52 @@ export const formatPrice = (price: number) => {
   return formatter.format(price)
 }
 
-export const getUserByEmail = async (email:string) => {
-  try{
+export function constructMetadata({
+  title = "CaseCobra - custom high-quality phone cases",
+  description = "Create custom high-quality phone cases in seconds",
+  image = "/thumbnail.png",
+  icons = "/favicon.ico",
+
+}: {
+  title?: string
+  description?: string
+  image?: string
+  icons?: string
+} = {}) : Metadata {
+  return {
+    title,
+    description,
+    openGraph:{
+      title,
+      description,
+      images:[{url:image}]
+    },
+    twitter: {
+      card:"summary_large_image",
+      title,
+      description,
+      images:[image],
+      creator:'@soufiene7'
+    },
+    icons,
+    metadataBase: new URL("https://case-cobra-two.vercel.app/")
+  }
+}
+
+export const getUserByEmail = async (email: string) => {
+  try {
     const user = await db.user.findUnique({
-      where: {email}
+      where: { email }
     })
     return user;
   } catch {
     return null
   }
 }
-export const getUserById = async (id:string) => {
-  try{
+export const getUserById = async (id: string) => {
+  try {
     const user = await db.user.findUnique({
-      where: {id}
+      where: { id }
     })
     return user;
   } catch {

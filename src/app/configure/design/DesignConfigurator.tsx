@@ -17,7 +17,7 @@ import { BASE_PRICE } from '@/config/products';
 import { useUploadThing } from '@/lib/uploadthing';
 import { useToast } from '@/components/ui/use-toast';
 import { useMutation } from '@tanstack/react-query';
-import { SaveConfigArgs, saveConfig as _saveConfig} from './actions';
+import { SaveConfigArgs, saveConfig as _saveConfig } from './actions';
 import { useRouter } from 'next/navigation';
 
 interface DesignConfiguratorProps {
@@ -34,19 +34,19 @@ const DesignConfigurator = ({ configId, imageUrl, imageDimensions }: DesignConfi
     const { mutate: saveConfig, isPending } = useMutation({
         mutationKey: ['save-config'],
         mutationFn: async (args: SaveConfigArgs) => {
-          await Promise.all([saveConfiguration(), _saveConfig(args)])
+            await Promise.all([saveConfiguration(), _saveConfig(args)])
         },
         onError: () => {
-          toast({
-            title: 'Something went wrong',
-            description: 'There was an error on our end. Please try again.',
-            variant: 'destructive',
-          })
+            toast({
+                title: 'Something went wrong',
+                description: 'There was an error on our end. Please try again.',
+                variant: 'destructive',
+            })
         },
         onSuccess: () => {
-          router.push(`/configure/preview?id=${configId}`)
+            router.push(`/configure/preview?id=${configId}`)
         },
-      })
+    })
 
     const [options, setOptions] = useState<{
         color: (typeof COLORS)[number]
@@ -275,15 +275,19 @@ const DesignConfigurator = ({ configId, imageUrl, imageDimensions }: DesignConfi
                             <p className='font-medium whitespace-nowrap'>
                                 {formatPrice((BASE_PRICE + options.finish.price + options.material.price) / 100)}
                             </p>
-                            <Button onClick={() =>
-                                saveConfig({
-                                    configId,
-                                    color: options.color.value,
-                                    finish: options.finish.value,
-                                    material: options.material.value,
-                                    model: options.model.value,
-                                })
-                            } size='sm' className='w-full'>
+                            <Button
+                                isLoading={isPending}
+                                disabled={isPending}
+                                loadingText='Saving'
+                                onClick={() =>
+                                    saveConfig({
+                                        configId,
+                                        color: options.color.value,
+                                        finish: options.finish.value,
+                                        material: options.material.value,
+                                        model: options.model.value,
+                                    })
+                                } size='sm' className='w-full'>
                                 Continue
                                 <ArrowRight className='h-4 w-4 ml-1.5 inline' />
                             </Button>

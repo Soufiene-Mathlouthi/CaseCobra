@@ -3,6 +3,10 @@ import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { Resend } from "resend"
+import OrderReceivedEmail from "@/components/emails/OrderReceivedEmail";
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(req: NextRequest) {
     try {
@@ -19,48 +23,65 @@ export async function POST(req: NextRequest) {
             if (!event.data.object.customer_details?.email) {
                 throw new Error('Missing user email')
             }
-        
 
-        const session = event.data.object as Stripe.Checkout.Session
 
-        const { userId, orderId } = session.metadata || { userId: null, orderId: null }
+            const session = event.data.object as Stripe.Checkout.Session
 
-        if (!userId || !orderId) {
-            throw new Error('Invalid request metadata')
+            const { userId, orderId } = session.metadata || { userId: null, orderId: null }
+
+            if (!userId || !orderId) {
+                throw new Error('Invalid request metadata')
+            }
+
+            const billingAddress = session.customer_details!.address
+            const shippingAddress = session.customer_details!.address
+
+            const updateOrder = await db.order.update({
+                where: {
+                    id: orderId
+                },
+                data: {
+                    isPaid: true,
+                    shippingAddress: {
+                        create: {
+                            name: session.customer_details!.name!,
+                            city: shippingAddress!.city!,
+                            country: shippingAddress!.country!,
+                            postalCode: shippingAddress!.postal_code!,
+                            street: shippingAddress!.line1!,
+                            state: shippingAddress!.state!
+                        }
+                    },
+                    billingAddress: {
+                        create: {
+                            name: session.customer_details!.name!,
+                            city: billingAddress!.city!,
+                            country: billingAddress!.country!,
+                            postalCode: billingAddress!.postal_code!,
+                            street: billingAddress!.line1!,
+                            state: billingAddress!.state!
+                        }
+                    },
+                },
+            })
+            await resend.emails.send({
+                from: "CaseCobra <sof.meth@gmail.com>",
+                to: [event.data.object.customer_details.email],
+                subject: "Thanks for your order!",
+                react: OrderReceivedEmail({
+                    orderId,
+                    orderDate: updateOrder.createdAt.toLocaleDateString(),
+                    // @ts-ignore
+                    shippingAddress:
+                    {name: session.customer_details!.name!,
+                    city: billingAddress!.city!,
+                    country: billingAddress!.country!,
+                    postalCode: billingAddress!.postal_code!,
+                    street: billingAddress!.line1!,
+                    state: billingAddress!.state! }
+                })
+            })
         }
-
-        const billingAddress = session.customer_details!.address
-        const shippingAddress = session.customer_details!.address
-
-        await db.order.update({
-            where: {
-                id: orderId
-            },
-            data: {
-                isPaid: true,
-                shippingAddress: {
-                    create: {
-                        name: session.customer_details!.name!,
-                        city: shippingAddress!.city!,
-                        country: shippingAddress!.country!,
-                        postalCode: shippingAddress!.postal_code!,
-                        street: shippingAddress!.line1!,
-                        state: shippingAddress!.state!
-                    }
-                },
-                billingAddress: {
-                    create: {
-                        name: session.customer_details!.name!,
-                        city: billingAddress!.city!,
-                        country: billingAddress!.country!,
-                        postalCode: billingAddress!.postal_code!,
-                        street: billingAddress!.line1!,
-                        state: billingAddress!.state!
-                    }
-                },
-            },
-        })
-    }
         return NextResponse.json({ result: event, ok: true })
     } catch (err) {
         console.error(err)
