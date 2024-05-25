@@ -14,7 +14,7 @@ Built with the Next.js 14 App Router, Postgres, TypeScript, Tailwind & Auth
 - 🛍️ Customers can purchase directly from you
 - 🌟 Clean, modern UI on top of shadcn-ui
 - 🛒 Completely custom phone case configurator
-- 🔑 Authentication using Kinde
+- 🔑 Authentication using Auth.js
 - ✉️ Beautiful thank-you email after purchase
 - ✅ Apple-inspired configuration design
 - ⌨️ 100% written in TypeScript
